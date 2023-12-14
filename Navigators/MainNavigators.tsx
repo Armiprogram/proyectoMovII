@@ -14,7 +14,7 @@ const MainNavigation = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="BIENVENIDO" component={HomeScreen} />
 
       </Stack.Navigator>
   
