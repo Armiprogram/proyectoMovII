@@ -1,21 +1,40 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
+import React, { useState } from "react";
+import { StyleSheet, Text, View, TextInput, Button, Alert } from "react-native";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../components/Config";
+
 
 export default function RegistroScreen({ navigation }: any) {
-  const [email, setEmail] = useState('');
-  const [nick, setNick] = useState('');
-  const [edad, setEdad] = useState('');
-  const [contrasena, setContrasena] = useState('');
+  const [email, setEmail] = useState("");
+  const [nick, setNick] = useState("");
+  const [edad, setEdad] = useState("");
+  const [contrasena, setContrasena] = useState("");
 
-  const handleRegistro = () => {
-    // Aquí puedes manejar la lógica de registro, por ejemplo, enviar la información a tu servidor.
-   
-    console.log('Email:', email);
-    console.log('Nick:', nick);
-    console.log('Edad:', edad);
-    console.log('Contraseña:', contrasena);
-    navigation.navigate("Login")
-    
+  function Registro() {
+ 
+    createUserWithEmailAndPassword(auth, email,contrasena)
+      .then((userCredential) => {
+        // Signed up
+        const user = userCredential.user;
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        switch (errorCode) {
+          case "auth/email-already-in-use":
+            Alert.alert("La dirección de correo ya esta siendo utilizada");
+            break;
+          case "auth/invalid-email":
+            Alert.alert("La dirección de correo no es válida");
+            break;
+          default:
+            Alert.alert("Mensaje", "Error al registrarse");
+        }
+        // ..
+      });
+
+    navigation.navigate("Login");
   };
 
   return (
@@ -51,7 +70,7 @@ export default function RegistroScreen({ navigation }: any) {
         onChangeText={(text) => setContrasena(text)}
       />
 
-      <Button title="Registrarse" onPress={handleRegistro} />
+      <Button title="Registrarse" onPress={()=> Registro()} />
     </View>
   );
 }
@@ -59,12 +78,12 @@ export default function RegistroScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   input: {
     height: 40,
-    borderColor: 'gray',
+    borderColor: "gray",
     borderWidth: 1,
     margin: 10,
     padding: 8,

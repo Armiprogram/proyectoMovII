@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, Alert } from 'react-native';
 
+
+
 export default function JuegoScreen() {
   const [tiempoRestante, setTiempoRestante] = useState(60);
   const [puntaje, setPuntaje] = useState(0);
@@ -50,6 +52,7 @@ export default function JuegoScreen() {
     setPuntaje(0);
     setTiempoRestante(60);
   };
+
 
   return (
     <View style={styles.container}>
