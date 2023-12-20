@@ -1,33 +1,54 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Image, Alert } from 'react-native';
 
 export default function JuegoScreen() {
-  //tiempo restante
-  const[tiempoRestante, setTiempoRestante] = useState(60);
-
-  //puntaje del jugador
-  const[puntaje, setPuntaje] = useState(0);
-
-  const[posicioninsecto, setPosiscionInsecto]=useState({
+  const [tiempoRestante, setTiempoRestante] = useState(60);
+  const [puntaje, setPuntaje] = useState(0);
+  const [posicionBoton, setPosicionBoton] = useState({
     left: Math.random() * 300,
-    top: Math.random()* 500,
+    top: Math.random() * 500,
   });
 
-  useEffect(()=>{
-    const intervaloTiempo = setInterval(()=>{
-      setTiempoRestante((inicioTiemp)=>(inicioTiemp>0? inicioTiemp - 1 : 0));
+  useEffect(() => {
+    const intervalo = setInterval(() => {
+      setTiempoRestante((prevTiempo) => (prevTiempo > 0 ? prevTiempo - 1 : 0));
     }, 1000);
 
-  return ()=> clearInterval(intervaloTiempo);
+    return () => clearInterval(intervalo);
   }, []);
 
-  const muerteExitosa = ()=>{
-    setPuntaje((inicioPuntaje)=> inicioPuntaje + 1);
+  useEffect(() => {
+    if (tiempoRestante === 0) {
+      mostrarAlerta();
+    }
+  }, [tiempoRestante]);
 
-    setPosiscionInsecto({
+  const manejarAccionExitosa = () => {
+    setPuntaje((prevPuntaje) => prevPuntaje + 1);
+
+    setPosicionBoton({
       left: Math.random() * 300,
       top: Math.random() * 500,
-    })
+    });
+  };
+
+  const mostrarAlerta = () => {
+    Alert.alert(
+      '¡Juego terminado!',
+      `Puntaje final: ${puntaje}`,
+      [
+        {
+          text: 'Reiniciar Juego',
+          onPress: reiniciarJuego,
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const reiniciarJuego = () => {
+    setPuntaje(0);
+    setTiempoRestante(60);
   };
 
   return (
@@ -35,26 +56,29 @@ export default function JuegoScreen() {
       <Text>Tiempo restante: {tiempoRestante} segundos</Text>
       <Text>Puntaje: {puntaje}</Text>
       <TouchableOpacity
-        style={[styles.button, { left: posicioninsecto.left, top: posicioninsecto.top }]}
-        onPress={muerteExitosa}
+        style={[styles.button, { left: posicionBoton.left, top: posicionBoton.top }]}
+        onPress={manejarAccionExitosa}
       >
-        <Text>Mover Botón</Text>
+        <Image
+          source={require('../assets/insecto.png')}
+          style={styles.image}
+        />
       </TouchableOpacity>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-
-  container:{
+  container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   button: {
     position: 'absolute',
-    backgroundColor: 'lightblue',
-    padding: 10,
-    borderRadius: 5,
   },
-})
+  image: {
+    width: 200,
+    height: 200,
+  },
+});
