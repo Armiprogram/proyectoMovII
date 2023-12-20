@@ -11,12 +11,26 @@ export default function LoginScreen({ navigation }: any) {
       .then((userCredential) => {
         // Acceso concedido 
         const user = userCredential.user;
-        Alert.alert("Acceso concedido", "Bienvenido a tu aplicación");
+        console.log("Acceso correcto");
         navigation.navigate('BottomTab');
       })
       .catch((error) => {
-        // Acceso denegado
-        Alert.alert("Acceso denegado", "Credenciales incorrectas. Por favor, inténtalo de nuevo.");
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log("Acceso denegado");
+        console.log(errorCode);
+        console.log(errorMessage);
+
+        switch (errorCode) {
+          case 'auth/missing-password':
+            Alert.alert("Error", "No puede ingresar una contraseña en blanco");
+            break;
+          case 'auth/wrong-password':
+            Alert.alert("Error", "Error en las credenciales");
+            break;
+          default:
+            Alert.alert("Error", "Comuníquese con el administrador");
+        }
       });
   };
 
