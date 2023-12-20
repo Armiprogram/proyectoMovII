@@ -1,40 +1,35 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, View, TextInput, Button, Alert } from "react-native";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../components/Config";
-
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
+import { getDatabase, ref, set, onValue, update, remove } from "firebase/database";
+import { db } from '../components/Config';
+import { auth } from '../components/Config';
+import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
 
 export default function RegistroScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
   const [nick, setNick] = useState("");
   const [edad, setEdad] = useState("");
-  const [contrasena, setContrasena] = useState("");
+  const [contrasenia, setContrasenia] = useState("");
 
-  function Registro() {
- 
-    createUserWithEmailAndPassword(auth, email,contrasena)
+  const handleRegistro = (email:string, nick:string, edad:string, contrasenia:string) => {
+    // Aquí puedes manejar la lógica de registro, por ejemplo, enviar la información a tu servidor.
+    set(ref(db, 'usuarios/' + nick), {
+      usermail: email,
+      age:edad,
+      pass:contrasenia
+  
+    });
+    setEmail("")
+    setNick("")
+    setEdad("")
+    setContrasenia("")
+    navigation.navigate("Login")
+    createUserWithEmailAndPassword(auth, email, contrasenia)
       .then((userCredential) => {
-        // Signed up
+        // Signed up 
         const user = userCredential.user;
-        // ...
+   
       })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        switch (errorCode) {
-          case "auth/email-already-in-use":
-            Alert.alert("La dirección de correo ya esta siendo utilizada");
-            break;
-          case "auth/invalid-email":
-            Alert.alert("La dirección de correo no es válida");
-            break;
-          default:
-            Alert.alert("Mensaje", "Error al registrarse");
-        }
-        // ..
-      });
-
-    navigation.navigate("Login");
   };
 
   return (
@@ -46,31 +41,31 @@ export default function RegistroScreen({ navigation }: any) {
         placeholder="Correo electrónico"
         keyboardType="email-address"
         autoCapitalize="none"
-        onChangeText={(text) => setEmail(text)}
+        onChangeText={(texto) => (setEmail(texto))}
       />
 
       <TextInput
         style={styles.input}
         placeholder="Nick"
         autoCapitalize="none"
-        onChangeText={(text) => setNick(text)}
+        onChangeText={(texto) => (setNick(texto))}
       />
 
       <TextInput
         style={styles.input}
         placeholder="Edad"
         keyboardType="numeric"
-        onChangeText={(text) => setEdad(text)}
+        onChangeText={(texto) => (setEdad(texto))}
       />
 
       <TextInput
         style={styles.input}
         placeholder="Contraseña"
         secureTextEntry
-        onChangeText={(text) => setContrasena(text)}
+        onChangeText={(texto) => (setContrasenia(texto))}
       />
 
-      <Button title="Registrarse" onPress={()=> Registro()} />
+      <Button title="Registrarse" onPress={()=> handleRegistro(email,nick,edad,contrasenia)} />
     </View>
   );
 }

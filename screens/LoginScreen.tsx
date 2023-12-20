@@ -1,12 +1,23 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Button, Alert, TouchableOpacity } from 'react-native';
-
+import { auth } from '../components/Config';
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 export default function LoginScreen({ navigation }: any) {
-
+  const [correo, setCorreo] = useState("");
+  const [contrasenia, setContrasenia] = useState("");
 
   const handleLogin = () => {
-   
-    navigation.navigate('BottomTab');
+    signInWithEmailAndPassword(auth, correo, contrasenia)
+      .then((userCredential) => {
+        // Acceso concedido 
+        const user = userCredential.user;
+        Alert.alert("Acceso concedido", "Bienvenido a tu aplicación");
+        navigation.navigate('BottomTab');
+      })
+      .catch((error) => {
+        // Acceso denegado
+        Alert.alert("Acceso denegado", "Credenciales incorrectas. Por favor, inténtalo de nuevo.");
+      });
   };
 
 
@@ -21,15 +32,13 @@ export default function LoginScreen({ navigation }: any) {
       <TextInput
         style={styles.input}
         placeholder="Usuario"
-    
-
+        onChangeText={(texto) => setCorreo(texto)}
       />
       <TextInput
         style={styles.input}
         placeholder="Contraseña"
         secureTextEntry
-
- 
+        onChangeText={(texto) => setContrasenia(texto)}
       />
       <Button title="Iniciar sesión" onPress={handleLogin} />
       
@@ -40,7 +49,6 @@ export default function LoginScreen({ navigation }: any) {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
