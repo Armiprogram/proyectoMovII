@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, Button, Alert } from 'react-native';
 import { auth, db } from '../components/Config';
-import { getAuth, updateEmail, updatePassword } from 'firebase/auth';
+import { update } from 'firebase/database';
 import { getDatabase, ref, onValue, set } from 'firebase/database';
+import { query, orderByChild, equalTo } from 'firebase/database';
 
 interface UserData {
   usermail: string;
@@ -54,37 +55,35 @@ export default function PerfilScreen({ navigation }: any) {
   cargarDatosUsuario();
 }, []);
 
-  const handleGuardarCambios = () => {
-    // Actualizar email y contraseña en Firebase Authentication
-    updateEmail(user, email)
-      .then(() => {
-        return updatePassword(user, contrasenia);
-      })
-      .then(() => {
-        // Actualizar datos del usuario en la base de datos
-        const userRef = ref(db, 'usuarios');
-        // Buscar el usuario por correo electrónico
-        const currentUser = Object.values(userRef).find((u: UserData) => u.usermail === user.email);
-        if (currentUser) {
-          // Actualizar los datos específicos del usuario
-          set(ref(db, 'usuarios/' + currentUser.nick), {
-            usermail: email,
-            nick: nick,
-            age: edad,
-            name:nombre,
-            last:apellido,
-            pass: contrasenia,
-          });
 
-          Alert.alert('Éxito', 'Cambios guardados correctamente');
-        } else {
-          Alert.alert('Error', 'No se encontró el usuario');
-        }
-      })
-      .catch((error) => {
-        Alert.alert('Error', error.message);
-      });
-  };
+
+const handleGuardarCambios = () => {
+  // Actualizar los datos del usuario en la base de datos en tiempo real
+  const userRef = ref(db, 'usuarios');
+
+  // Realizar una consulta para encontrar al usuario por su correo electrónico
+  const queryRef = query(userRef, orderByChild('usermail'), equalTo(user.email));
+
+  onValue(queryRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const key = Object.keys(snapshot.val())[0];
+      const datosUsuarioActualizados: Partial<UserData> = {
+        name: nombre,
+        last: apellido,
+        age: edad,
+      };
+
+      // Utilizar 'update' en lugar de 'set' para actualizar solo los campos específicos
+      update(ref(db, `usuarios/${key}`), datosUsuarioActualizados);
+
+      Alert.alert('Éxito', 'Cambios guardados correctamente');
+    } else {
+      Alert.alert('Error', 'No se encontró al usuario en la base de datos');
+    }
+  });
+};
+
+
 
   return (
     <View style={styles.container}>
