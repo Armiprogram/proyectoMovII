@@ -1,58 +1,131 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { getDatabase, ref, onValue } from 'firebase/database';
-import { firebaseConfig } from '../components/Config';
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TextInput, Button, Alert } from 'react-native';
+import { auth, db } from '../components/Config';
+import { getAuth, updateEmail, updatePassword } from 'firebase/auth';
+import { getDatabase, ref, onValue, set } from 'firebase/database';
 
-type UserData = {
+interface UserData {
   usermail: string;
-  age: string; // Ajusta el tipo según el tipo real en tu base de datos
-};
+  nick: string;
+  age: string;
+  pass: string; // Esto es solo para referencia, no es recomendable almacenar contraseñas en el estado
+}
 
-export default function PerfilScreen() {
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const auth = getAuth();
+export default function PerfilScreen({ navigation }: any) {
+  const [user, setUser] = useState<any>(null);
+  const [email, setEmail] = useState('');
+  const [nick, setNick] = useState('');
+  const [edad, setEdad] = useState('');
+  const [contrasenia, setContrasenia] = useState('');
 
   useEffect(() => {
-    const firebaseApp = initializeApp(firebaseConfig);
-    const db = getDatabase(firebaseApp);
+    const cargarDatosUsuario = () => {
+      const user = auth.currentUser;
+      if (user) {
+        setUser(user);
 
-    const user = auth.currentUser;
+        // Obtener datos del usuario desde la base de datos usando el correo electrónico como identificador
+        const userRef = ref(db, 'usuarios');
+        onValue(userRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const usersData = snapshot.val();
+            const userData: UserData | undefined = Object.values(usersData).find(
+              (u: UserData) => u.usermail === user.email
+            );
 
-    if (user) {
-      const userUid = user.email
-      ;
+            if (userData) {
+              setEmail(userData.usermail);
+              setNick(userData.nick);
+              setEdad(userData.age);
+              // No recomendado almacenar la contraseña en el estado
+              // setContrasenia(userData.pass);
+            }
+          }
+        });
+      }
+    };
 
-      const userRef = ref(db,'usuarios/');
-      const unsubscribe = onValue(userRef, (snapshot) => {
-        const userData = snapshot.val();
+    cargarDatosUsuario();
+  }, []);
 
-        if (userData) {
-          // Accede directamente al objeto de usuario logueado
-          setUserData(userData);
+  const handleGuardarCambios = () => {
+    // Actualizar email y contraseña en Firebase Authentication
+    updateEmail(user, email)
+      .then(() => {
+        return updatePassword(user, contrasenia);
+      })
+      .then(() => {
+        // Actualizar datos del usuario en la base de datos
+        const userRef = ref(db, 'usuarios');
+        // Buscar el usuario por correo electrónico
+        const currentUser = Object.values(userRef).find((u: UserData) => u.usermail === user.email);
+        if (currentUser) {
+          // Actualizar los datos específicos del usuario
+          set(ref(db, 'usuarios/' + currentUser.nick), {
+            usermail: email,
+            nick: nick,
+            age: edad,
+            pass: contrasenia,
+          });
 
-          console.log('Datos del usuario:', userData);
+          Alert.alert('Éxito', 'Cambios guardados correctamente');
         } else {
-          console.log('No se encontraron datos para el usuario');
+          Alert.alert('Error', 'No se encontró el usuario');
         }
+      })
+      .catch((error) => {
+        Alert.alert('Error', error.message);
       });
-
-      return () => {
-        unsubscribe();
-      };
-    }
-  }, [auth]);
+  };
 
   return (
-    <View>
-      {userData && (
-        <View>
-          <Text>Email: {userData.usermail} | Edad: {userData.age}</Text>
-        </View>
-      )}
+    <View style={styles.container}>
+      <Text>PerfilScreen</Text>
+      <Text>Email: {email}</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Nuevo Email"
+        value={email}
+        onChangeText={(texto) => setEmail(texto)}
+      />
+      <Text>Nick: {nick}</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Nuevo Nick"
+        value={nick || ''}
+        onChangeText={(texto) => setNick(texto)}
+      />
+      <Text>Edad: {edad}</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Nueva Edad"
+        value={edad}
+        onChangeText={(texto) => setEdad(texto)}
+      />
+      <Text>Contraseña: ********</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Nueva Contraseña"
+        secureTextEntry
+        onChangeText={(texto) => setContrasenia(texto)}
+      />
+      <Button title="Guardar Cambios" onPress={handleGuardarCambios} />
     </View>
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    margin: 10,
+    padding: 8,
+    width: 200,
+  },
+});
