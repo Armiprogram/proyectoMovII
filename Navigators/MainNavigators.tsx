@@ -8,6 +8,7 @@ import JuegoScreen from "../screens/JuegoScreen";
 import PuntosScreen from "../screens/PuntosScreen";
 import LoginScreen from "../screens/LoginScreen";
 import RegistroScreen from "../screens/RegistroScreen";
+import PerfilScreen from "../screens/PerfilScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -26,6 +27,7 @@ const BottomTabNavigator = () => {
     <Tab.Navigator>
       <Tab.Screen name="JuegoScreen" component={JuegoScreen} />
       <Tab.Screen name="PuntosScreen" component={PuntosScreen} />
+      <Tab.Screen name="PerfilScreen" component={PerfilScreen} />
     </Tab.Navigator>
   );
 };
