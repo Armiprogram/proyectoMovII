@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image, Alert } from 'react-native';
-
-
+import { StyleSheet, Text, View, TouchableOpacity, Image, TextInput, Button, Alert } from 'react-native';
+import { getDatabase, ref, set } from "firebase/database";
+import { db } from '../components/Config';
 
 export default function JuegoScreen() {
+  const [nick, setNick] = useState("");
   const [tiempoRestante, setTiempoRestante] = useState(60);
   const [puntaje, setPuntaje] = useState(0);
   const [posicionBoton, setPosicionBoton] = useState({
@@ -11,27 +12,39 @@ export default function JuegoScreen() {
     top: Math.random() * 500,
   });
 
-  useEffect(() => {
-    const intervalo = setInterval(() => {
-      setTiempoRestante((prevTiempo) => (prevTiempo > 0 ? prevTiempo - 1 : 0));
-    }, 1000);
-
-    return () => clearInterval(intervalo);
-  }, []);
+  const [juegoIniciado, setJuegoIniciado] = useState(false);
 
   useEffect(() => {
-    if (tiempoRestante === 0) {
-      mostrarAlerta();
+    if (juegoIniciado && tiempoRestante > 0) {
+      const intervalo = setInterval(() => {
+        setTiempoRestante((prevTiempo) => (prevTiempo > 0 ? prevTiempo - 1 : 0));
+      }, 1000);
+
+      return () => clearInterval(intervalo);
     }
-  }, [tiempoRestante]);
+  }, [juegoIniciado, tiempoRestante]);
+
+  useEffect(() => {
+    if (tiempoRestante === 0 && juegoIniciado) {
+      mostrarAlerta();
+      subirPuntuacion(nick, puntaje);
+      setJuegoIniciado(false);
+    }
+  }, [tiempoRestante, juegoIniciado]);
 
   const manejarAccionExitosa = () => {
-    setPuntaje((prevPuntaje) => prevPuntaje + 1);
+    if (juegoIniciado) {
+      setPuntaje((prevPuntaje) => prevPuntaje + 1);
 
-    setPosicionBoton({
-      left: Math.random() * 300,
-      top: Math.random() * 500,
-    });
+      setPosicionBoton({
+        left: Math.random() * 300,
+        top: Math.random() * 500,
+      });
+    }
+  };
+
+  const iniciarJuego = () => {
+    setJuegoIniciado(true);
   };
 
   const mostrarAlerta = () => {
@@ -51,22 +64,43 @@ export default function JuegoScreen() {
   const reiniciarJuego = () => {
     setPuntaje(0);
     setTiempoRestante(60);
+    setJuegoIniciado(false);
   };
 
+  const subirPuntuacion = (nick: string, puntaje: number) => {
+    set(ref(db, 'tablapuntuacion/' + nick), {
+      Puntuacion: puntaje
+    });
+  }
 
   return (
     <View style={styles.container}>
       <Text>Tiempo restante: {tiempoRestante} segundos</Text>
       <Text>Puntaje: {puntaje}</Text>
-      <TouchableOpacity
-        style={[styles.button, { left: posicionBoton.left, top: posicionBoton.top }]}
-        onPress={manejarAccionExitosa}
-      >
-        <Image
-          source={require('../assets/insecto.png')}
-          style={styles.image}
-        />
-      </TouchableOpacity>
+
+      {!juegoIniciado && (
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Ingrese su nick"
+            autoCapitalize="none"
+            onChangeText={(texto) => setNick(texto)}
+          />
+          <Button title="Iniciar Juego" onPress={iniciarJuego} />
+        </View>
+      )}
+
+      {juegoIniciado && (
+        <TouchableOpacity
+          style={[styles.button, { left: posicionBoton.left, top: posicionBoton.top }]}
+          onPress={manejarAccionExitosa}
+        >
+          <Image
+            source={require('../assets/insecto.png')}
+            style={styles.image}
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -76,6 +110,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  inputContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    margin: 10,
+    padding: 8,
+    width: 200,
   },
   button: {
     position: 'absolute',
