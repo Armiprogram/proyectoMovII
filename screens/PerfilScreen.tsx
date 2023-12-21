@@ -8,6 +8,8 @@ interface UserData {
   usermail: string;
   nick: string;
   age: string;
+  name:string;
+  last:string;
   pass: string; // Esto es solo para referencia, no es recomendable almacenar contraseñas en el estado
 }
 
@@ -16,37 +18,41 @@ export default function PerfilScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [nick, setNick] = useState('');
   const [edad, setEdad] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [apellido, setApellido] = useState('');
   const [contrasenia, setContrasenia] = useState('');
 
-  useEffect(() => {
-    const cargarDatosUsuario = () => {
-      const user = auth.currentUser;
-      if (user) {
-        setUser(user);
+ useEffect(() => {
+  const cargarDatosUsuario = () => {
+    const user = auth.currentUser;
+    if (user) {
+      setUser(user);
 
-        // Obtener datos del usuario desde la base de datos usando el correo electrónico como identificador
-        const userRef = ref(db, 'usuarios');
-        onValue(userRef, (snapshot) => {
-          if (snapshot.exists()) {
-            const usersData = snapshot.val();
-            const userData: UserData | undefined = Object.values(usersData).find(
-              (u: UserData) => u.usermail === user.email
-            );
+      // Obtener datos del usuario desde la base de datos usando el correo electrónico como identificador
+      const userRef = ref(db, 'usuarios');
+      onValue(userRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const usersData = snapshot.val();
+          const userData: UserData | undefined = Object.values(usersData).find(
+            (u: UserData) => u.usermail === user.email
+          );
 
-            if (userData) {
-              setEmail(userData.usermail);
-              setNick(userData.nick);
-              setEdad(userData.age);
-              // No recomendado almacenar la contraseña en el estado
-              // setContrasenia(userData.pass);
-            }
+          if (userData) {
+            setEmail(userData.usermail);
+            setNick(userData.nick);
+            setEdad(userData.age);
+            setNombre(userData.name);  // Corregir aquí
+            setApellido(userData.last);  // Corregir aquí
+            // No recomendado almacenar la contraseña en el estado
+            // setContrasenia(userData.pass);
           }
-        });
-      }
-    };
+        }
+      });
+    }
+  };
 
-    cargarDatosUsuario();
-  }, []);
+  cargarDatosUsuario();
+}, []);
 
   const handleGuardarCambios = () => {
     // Actualizar email y contraseña en Firebase Authentication
@@ -65,6 +71,8 @@ export default function PerfilScreen({ navigation }: any) {
             usermail: email,
             nick: nick,
             age: edad,
+            name:nombre,
+            last:apellido,
             pass: contrasenia,
           });
 
@@ -82,19 +90,7 @@ export default function PerfilScreen({ navigation }: any) {
     <View style={styles.container}>
       <Text>PerfilScreen</Text>
       <Text>Email: {email}</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Nuevo Email"
-        value={email}
-        onChangeText={(texto) => setEmail(texto)}
-      />
-      <Text>Nick: {nick}</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Nuevo Nick"
-        value={nick || ''}
-        onChangeText={(texto) => setNick(texto)}
-      />
+
       <Text>Edad: {edad}</Text>
       <TextInput
         style={styles.input}
@@ -102,12 +98,19 @@ export default function PerfilScreen({ navigation }: any) {
         value={edad}
         onChangeText={(texto) => setEdad(texto)}
       />
-      <Text>Contraseña: ********</Text>
+      <Text>Nombre: {nombre}</Text>
       <TextInput
         style={styles.input}
-        placeholder="Nueva Contraseña"
-        secureTextEntry
-        onChangeText={(texto) => setContrasenia(texto)}
+        placeholder="Nuevo Nombre"
+        value={nombre}
+        onChangeText={(texto) => setNombre(texto)}
+      />
+      <Text>Apellido: {apellido}</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Nuevo Apellido"
+        value={apellido}
+        onChangeText={(texto) => setApellido(texto)}
       />
       <Button title="Guardar Cambios" onPress={handleGuardarCambios} />
     </View>

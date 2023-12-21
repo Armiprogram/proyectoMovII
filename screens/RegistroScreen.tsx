@@ -12,19 +12,25 @@ export default function RegistroScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
   const [nick, setNick] = useState("");
   const [edad, setEdad] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
   const [contrasenia, setContrasenia] = useState("");
 
-  const handleRegistro = (email:string, nick:string, edad:string, contrasenia:string) => {
+  const handleRegistro = (email:string, nick:string, edad:string,nombre:string,apellido:string, contrasenia:string) => {
     // Aquí puedes manejar la lógica de registro, por ejemplo, enviar la información a tu servidor.
     set(ref(db, 'usuarios/' + nick), {
       usermail: email,
       age:edad,
+      name:nombre,
+      last:apellido,
       pass:contrasenia
   
     });
     setEmail("")
     setNick("")
     setEdad("")
+    setNombre("")
+    setApellido("")
     setContrasenia("")
     navigation.navigate("Login")
     createUserWithEmailAndPassword(auth, email, contrasenia)
@@ -116,6 +122,18 @@ export default function RegistroScreen({ navigation }: any) {
         keyboardType="numeric"
         onChangeText={(texto) => (setEdad(texto))}
       />
+            <TextInput
+        style={styles.input}
+        placeholder="Nombre"
+        keyboardType="default"
+        onChangeText={(texto) => (setNombre(texto))}
+      />
+            <TextInput
+        style={styles.input}
+        placeholder="Apellido"
+        keyboardType="default"
+        onChangeText={(texto) => (setApellido(texto))}
+      />
 
       <TextInput
         style={styles.input}
@@ -124,7 +142,7 @@ export default function RegistroScreen({ navigation }: any) {
         onChangeText={(texto) => (setContrasenia(texto))}
       />
 
-      <Button title="Registrarse" onPress={()=> handleRegistro(email,nick,edad,contrasenia)} />
+      <Button title="Registrarse" onPress={()=> handleRegistro(email,nick,edad,nombre,apellido,contrasenia)} />
       <View>
       <Text>Subir imagen desde la Galería</Text>
       <Button title='Seleccionar imagen' onPress={() => pickImageAsync()} />
