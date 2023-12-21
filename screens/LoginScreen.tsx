@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, Alert, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, Alert, TouchableOpacity, ImageBackground } from 'react-native';
 import { auth } from '../components/Config';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 export default function LoginScreen({ navigation }: any) {
@@ -41,8 +41,16 @@ export default function LoginScreen({ navigation }: any) {
   };
 
   return (
+    <ImageBackground
+      style={styles.fondo}
+      source={{
+        uri:
+          'https://i.pinimg.com/564x/77/4e/01/774e0172c6c89c018065ef2c7c254077.jpg',
+      }}
+    >
+
     <View style={styles.container}>
-      <Text>Inicio de sesión</Text>
+      <Text style={{ fontSize: 24 }}>Inicio de sesión</Text>
       <TextInput
         style={styles.input}
         placeholder="Usuario"
@@ -54,13 +62,14 @@ export default function LoginScreen({ navigation }: any) {
         secureTextEntry
         onChangeText={(texto) => setContrasenia(texto)}
       />
-      <Button title="Iniciar sesión" onPress={handleLogin} />
+      <Button title="Iniciar sesión" onPress={handleLogin}  color="#ff4500" />
       
       {/* Botón para ir a la pantalla de registro */}
       <TouchableOpacity onPress={handleRegistro}>
-        <Text style={styles.registroButton}>Registrarse</Text>
+        <Text style={[styles.registroButton, { fontSize: 18, fontWeight: 'bold' }]}>Registrarse</Text>
       </TouchableOpacity>
     </View>
+    </ImageBackground>
   );
 }
 const styles = StyleSheet.create({
@@ -68,19 +77,25 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    width: '90%',
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
+    height: 50,
+    borderColor: 'black',
+    borderWidth: 2,
     marginBottom: 10,
     padding: 10,
-    width: '80%',
+    width: '90%',
   },
   registroButton: {
-    marginTop: 10,
-    color: 'blue', // Puedes personalizar el color del texto
+    marginTop: 20,
+    color: 'black', // Puedes personalizar el color del texto
     textDecorationLine: 'underline',
+  },
+  fondo: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

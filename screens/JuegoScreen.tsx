@@ -75,8 +75,9 @@ export default function JuegoScreen() {
 
   return (
     <View style={styles.container}>
-      <Text>Tiempo restante: {tiempoRestante} segundos</Text>
-      <Text>Puntaje: {puntaje}</Text>
+      <Text style={styles.titulo}>JuegoScreen</Text>
+      <Text style={styles.infoText}>Tiempo restante: {tiempoRestante} segundos</Text>
+      <Text style={styles.infoText}>Puntaje: {puntaje}</Text>
 
       {!juegoIniciado && (
         <View style={styles.inputContainer}>
@@ -86,7 +87,7 @@ export default function JuegoScreen() {
             autoCapitalize="none"
             onChangeText={(texto) => setNick(texto)}
           />
-          <Button title="Iniciar Juego" onPress={iniciarJuego} />
+          <Button title="Iniciar Juego" onPress={iniciarJuego} color="#ff4500" />
         </View>
       )}
 
@@ -111,6 +112,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  titulo: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#000',
+  },
+  infoText: {
+    fontSize: 16,
+    marginBottom: 10,
+    color: '#212121',
+  },
   inputContainer: {
     alignItems: 'center',
     marginBottom: 20,
@@ -122,6 +134,7 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 8,
     width: 200,
+    backgroundColor: '#fff',
   },
   button: {
     position: 'absolute',

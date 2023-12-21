@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, Alert, Image} from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, Alert, Image, ImageBackground} from 'react-native';
 import { getDatabase, ref, set, onValue, update, remove } from "firebase/database";
 import { db } from '../components/Config';
 import { auth } from '../components/Config';
@@ -98,8 +98,15 @@ export default function RegistroScreen({ navigation }: any) {
  
 
   return (
+    <ImageBackground
+    style={styles.fondo}
+    source={{
+      uri:
+        'https://i.pinimg.com/736x/12/ef/b2/12efb296c5109d4fcd533f16bdbf06b2.jpg',
+    }}
+  >
     <View style={styles.container}>
-      <Text>RegistroScreen</Text>
+      <Text style={{ fontSize: 20}}>Registro</Text>
 
       <TextInput
         style={styles.input}
@@ -142,16 +149,16 @@ export default function RegistroScreen({ navigation }: any) {
         onChangeText={(texto) => (setContrasenia(texto))}
       />
 
-      <Button title="Registrarse" onPress={()=> handleRegistro(email,nick,edad,nombre,apellido,contrasenia)} />
-      <View>
-      <Text>Subir imagen desde la Galería</Text>
-      <Button title='Seleccionar imagen' onPress={() => pickImageAsync()} />
+      <Button title="Registrarse" onPress={()=> handleRegistro(email,nick,edad,nombre,apellido,contrasenia)}color="#00796B" />
+      <View style={styles.subirImagenContainer}>
+      <Text style={{ marginBottom: 10 }}>Subir imagen desde la Galería</Text>
+      <Button title='Seleccionar imagen' onPress={() => pickImageAsync()} color="#ff4500" />
       <Image source={{ uri: imagen }} style={styles.img} />
-      <Button title='Subir' onPress={() => subir("foto1")} />
+      <Button title='Subir' onPress={() => subir("foto1")} color="#F9A825" />
     </View>
     </View>
 
-    
+    </ImageBackground>
   );
 }
 
@@ -160,19 +167,29 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+
   },
   img: {
     width: 300,
     height: 200,
     alignSelf: 'center',
-    marginVertical: 20,
+
   },
   input: {
-    height: 40,
+    height: 35,
     borderColor: "gray",
     borderWidth: 1,
     margin: 10,
-    padding: 8,
+    padding: 6,
     width: 200,
+
+  },
+  fondo: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  subirImagenContainer: {
+    alignItems: 'center',
   },
 });
